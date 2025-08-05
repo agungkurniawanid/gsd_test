@@ -9,51 +9,60 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
-    {
-        $sort = $request->get('sort', 'latest');
-        $search = $request->get('search');
+   public function index(Request $request)
+{
+    $sort = $request->get('sort', 'latest');
+    $search = $request->get('search');
 
-        $query = Product::query();
+    $query = Product::query();
 
-        if ($search) {
-            $searchTerm = '%' . strtolower(trim($search)) . '%';
-            $query->where(function ($q) use ($searchTerm) {
-                $q->whereRaw('LOWER(brand) LIKE ?', [$searchTerm])
-                    ->orWhereRaw('LOWER(description) LIKE ?', [$searchTerm]);
-            });
-        }
-
-        switch ($sort) {
-            case 'latest':
-                $query->orderBy('created_at', 'desc');
-                break;
-            case 'oldest':
-                $query->orderBy('created_at', 'asc');
-                break;
-            case 'name_asc':
-                $query->orderBy('name', 'asc');
-                break;
-            case 'name_desc':
-                $query->orderBy('name', 'desc');
-                break;
-            case 'price_asc':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_desc':
-                $query->orderBy('price', 'desc');
-                break;
-            default:
-                $query->orderBy('created_at', 'desc');
-        }
-
-        $products = $query->get();
-
-        return view('product', [
-            'title' => 'Produk - PT Smart',
-            'products' => $products
-        ]);
+    // Search functionality
+    if ($search) {
+        $searchTerm = '%' . strtolower(trim($search)) . '%';
+        $query->where(function ($q) use ($searchTerm) {
+            $q->whereRaw('LOWER(brand) LIKE ?', [$searchTerm])
+              ->orWhereRaw('LOWER(type) LIKE ?', [$searchTerm])
+              ->orWhereRaw('LOWER(description) LIKE ?', [$searchTerm]);
+        });
     }
+
+    // Sorting options
+    switch ($sort) {
+        case 'latest':
+            $query->orderBy('created_at', 'desc');
+            break;
+        case 'oldest':
+            $query->orderBy('created_at', 'asc');
+            break;
+        case 'brand_asc':
+            $query->orderBy('brand', 'asc');
+            break;
+        case 'brand_desc':
+            $query->orderBy('brand', 'desc');
+            break;
+        case 'price_asc':
+            $query->orderBy('price', 'asc');
+            break;
+        case 'price_desc':
+            $query->orderBy('price', 'desc');
+            break;
+        case 'stock_asc':
+            $query->orderBy('stock', 'asc');
+            break;
+        case 'stock_desc':
+            $query->orderBy('stock', 'desc');
+            break;
+        default:
+            $query->orderBy('created_at', 'desc');
+    }
+
+    $products = $query->get();
+
+    return view('product', [
+        'title' => 'Produk - PT Smart',
+        'products' => $products
+    ]);
+}
 
     public function store(Request $request)
     {
